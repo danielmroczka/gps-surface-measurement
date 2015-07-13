@@ -2,10 +2,12 @@ package com.labs.dm.gpssurfacemeasurement;
 
 import android.app.Activity;
 import android.content.Context;
+import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,35 +17,69 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends Activity {
 
     private LocationManager locationManager;
+    private Location lastLocation;
+    private long mLastLocationMillis;
     private Button button;
     private Button cleanBtn;
+    private Button undoButton;
     private List<Position> list = new ArrayList();
-    private TextView textView;
     private TextView counter;
     private TextView result;
     private TextView log;
+    private TextView estimate;
+
+    public void setGpsFix(boolean gpsFix) {
+        this.gpsFix = gpsFix;
+        button.setEnabled(gpsFix);
+    }
+
+    private boolean gpsFix;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        button = (Button) findViewById(R.id.button);
-        counter = (TextView) findViewById(R.id.textView);
-        cleanBtn = (Button) findViewById(R.id.button2);
+        button = (Button) findViewById(R.id.captureBtn);
+        undoButton = (Button) findViewById(R.id.undoButton);
+        counter = (TextView) findViewById(R.id.countView);
+        cleanBtn = (Button) findViewById(R.id.clearBtn);
         result = (TextView) findViewById(R.id.result);
+        estimate = (TextView) findViewById(R.id.estimate);
         log = (TextView) findViewById(R.id.log);
-        button.setOnClickListener(this);
+        button.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Location locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                list.add(new Position(locationGPS.getLongitude(), locationGPS.getLatitude()));
+                undoButton.setEnabled(true);
+                calculate();
+            }
+        });
         cleanBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                undoButton.setEnabled(false);
                 list.clear();
-                //  counter.setText(list.size());
-                result.setText("");
+                estimate.setText("0.0");
+                result.setText("0.0");
                 log.setText("");
+                counter.setText("0");
+            }
+        });
+        undoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (list.size() > 0) {
+                    list.remove(list.size() - 1);
+                    calculate();
+                } else {
+                    undoButton.setEnabled(false);
+                }
             }
         });
 
@@ -52,6 +88,20 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
             @Override
             public void onLocationChanged(Location location) {
+                if (location == null) return;
+                mLastLocationMillis = SystemClock.elapsedRealtime();
+                lastLocation = location;
+
+                if (gpsFix) {
+                    List<Position> l = new ArrayList<>(list);
+                    l.add(new Position(location.getLongitude(), location.getLatitude()));
+                    double sum = 0;
+                    if (l.size() > 1) {
+                        sum = polygonArea(l.toArray(new Position[l.size()]));
+                    }
+
+                    estimate.setText(String.format("%.3f", (sum)) + (l.size() < 3 ? " m" : " m2"));
+                }
 
             }
 
@@ -70,11 +120,33 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
             }
         });
+
+        GpsStatus.Listener listener = new GpsStatus.Listener() {
+            public void onGpsStatusChanged(int event) {
+
+                if (event == GpsStatus.GPS_EVENT_SATELLITE_STATUS) {
+                    if (lastLocation != null) {
+                        setGpsFix((SystemClock.elapsedRealtime() - mLastLocationMillis) < 2000 && lastLocation.getAccuracy() < 100);
+                    }
+                }
+            }
+        };
+
+        locationManager.addGpsStatusListener(listener);
+    }
+
+    private void calculate() {
+        double sum = 0;
+        if (list.size() > 1) {
+            sum = polygonArea(list.toArray(new Position[list.size()]));
+        }
+
+        result.setText(String.format("%.3f", (sum)) + (list.size() < 3 ? " m" : " m2"));
+        counter.setText(String.valueOf(list.size()));
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -82,18 +154,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
     public double polygonArea(Position... point) {
-        if (point.length < 3) {
-            return 0;
-        }
+
         log.setText("");
 
         Position[] ref = new Position[point.length];
@@ -102,9 +167,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
         log.append(ref[0].toString());
         log.append("\n");
 
+        if (point.length == 2) {
+            return Utils.calculateDistance(point[0], point[1]);
+        } else if (point.length < 3) {
+            return 0;
+        }
+
         for (int i = 1; i < ref.length; i++) {
-            double bearing = bearing(point[i - 1], point[i]);
-            double distance = calculateDistance(point[i - 1], point[i]);
+            double bearing = Utils.bearing(point[i - 1], point[i]);
+            double distance = Utils.calculateDistance(point[i - 1], point[i]);
 
             double x = Math.cos(bearing) * distance;
             double y = Math.sin(bearing) * distance;
@@ -123,44 +194,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         sum += ref[0].getLatitude() * (ref[1].getLongitude() - ref[ref.length - 1].getLongitude());
         sum += ref[ref.length - 1].getLatitude() * (ref[0].getLongitude() - ref[ref.length - 2].getLongitude());
         return Math.abs(0.5d * sum);
-    }
-
-    @Override
-    public void onClick(View v) {
-        Location locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        list.add(new Position(locationGPS.getLongitude(), locationGPS.getLatitude()));
-        double sum = 0;
-        //   counter.setText(list.size());
-        if (list.size() > 2) {
-            sum = polygonArea(list.toArray(new Position[0]));
-        }
-
-        result.setText(String.format("%.3f", (sum)) + " m2");
-    }
-
-    public static double calculateDistance(Position src, Position dest) {
-
-        double latDistance = Math.toRadians(src.getLatitude() - dest.getLatitude());
-        double lngDistance = Math.toRadians(src.getLongitude() - dest.getLongitude());
-
-        double a = (Math.sin(latDistance / 2) * Math.sin(latDistance / 2))
-                + (Math.cos(Math.toRadians(src.getLatitude())))
-                * (Math.cos(Math.toRadians(dest.getLatitude())))
-                * (Math.sin(lngDistance / 2))
-                * (Math.sin(lngDistance / 2));
-
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return 1000d * 6371 * c;
-    }
-
-    public static double bearing(Position src, Position dest) {
-        double latitude1 = Math.toRadians(src.getLatitude());
-        double latitude2 = Math.toRadians(dest.getLatitude());
-        double longDiff = Math.toRadians(dest.getLongitude() - src.getLongitude());
-        double y = Math.sin(longDiff) * Math.cos(latitude2);
-        double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
-
-        return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
     }
 
 }

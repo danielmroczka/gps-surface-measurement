@@ -33,6 +33,6 @@ public class Position {
 
     @Override
     public String toString() {
-        return String.format("%.4f,%.4f", getLatitude(), getLongitude());
+        return String.format("%.2f,%.2f", getLatitude(), getLongitude());
     }
 }
