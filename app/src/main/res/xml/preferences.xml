@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="General">
+        <EditTextPreference
+            android:defaultValue="5"
+            android:inputType="number"
+            android:key="scan.interval"
+            android:summary="Please provide scan interval [seconds]"
+            android:title="Scan Interval"></EditTextPreference>
+        <EditTextPreference
+            android:defaultValue="5"
+            android:inputType="number"
+            android:key="scan.interval"
+            android:summary="Please provide scan interval [seconds]"
+            android:title="Scan Interval"></EditTextPreference>
+        <EditTextPreference
+            android:defaultValue="5"
+            android:inputType="number"
+            android:key="scan.interval"
+            android:summary="Please provide scan interval [seconds]"
+            android:title="Scan Interval"></EditTextPreference>
+    </PreferenceCategory>
+</PreferenceScreen>

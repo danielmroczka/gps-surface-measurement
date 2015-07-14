@@ -2,6 +2,7 @@ package com.labs.dm.gpssurfacemeasurement;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
@@ -45,13 +46,14 @@ public class MainActivity extends Activity {
 
         button = (Button) findViewById(R.id.captureBtn);
         undoButton = (Button) findViewById(R.id.undoButton);
-        counter = (TextView) findViewById(R.id.countView);
         cleanBtn = (Button) findViewById(R.id.clearBtn);
+
+        counter = (TextView) findViewById(R.id.countView);
         result = (TextView) findViewById(R.id.result);
         estimate = (TextView) findViewById(R.id.estimate);
         log = (TextView) findViewById(R.id.log);
-        button.setOnClickListener(new View.OnClickListener() {
 
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Location locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -88,21 +90,22 @@ public class MainActivity extends Activity {
 
             @Override
             public void onLocationChanged(Location location) {
-                if (location == null) return;
+                if (location == null) {
+                    return;
+                }
                 mLastLocationMillis = SystemClock.elapsedRealtime();
                 lastLocation = location;
 
                 if (gpsFix) {
-                    List<Position> l = new ArrayList<>(list);
-                    l.add(new Position(location.getLongitude(), location.getLatitude()));
+                    List<Position> tempList = new ArrayList<>(list);
+                    tempList.add(new Position(location.getLongitude(), location.getLatitude()));
                     double sum = 0;
-                    if (l.size() > 1) {
-                        sum = polygonArea(l.toArray(new Position[l.size()]));
+                    if (tempList.size() > 1) {
+                        sum = Utils.polygonArea(log, tempList.toArray(new Position[tempList.size()]));
                     }
 
-                    estimate.setText(String.format("%.3f", (sum)) + (l.size() < 3 ? " m" : " m2"));
+                    estimate.setText(String.format("%.3f", (sum)) + (tempList.size() < 3 ? " m" : " m2"));
                 }
-
             }
 
             @Override
@@ -121,7 +124,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        GpsStatus.Listener listener = new GpsStatus.Listener() {
+        locationManager.addGpsStatusListener(new GpsStatus.Listener() {
             public void onGpsStatusChanged(int event) {
 
                 if (event == GpsStatus.GPS_EVENT_SATELLITE_STATUS) {
@@ -130,15 +133,13 @@ public class MainActivity extends Activity {
                     }
                 }
             }
-        };
-
-        locationManager.addGpsStatusListener(listener);
+        });
     }
 
     private void calculate() {
         double sum = 0;
         if (list.size() > 1) {
-            sum = polygonArea(list.toArray(new Position[list.size()]));
+            sum = Utils.polygonArea(log, list.toArray(new Position[list.size()]));
         }
 
         result.setText(String.format("%.3f", (sum)) + (list.size() < 3 ? " m" : " m2"));
@@ -153,47 +154,13 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        return id == R.id.action_settings || super.onOptionsItemSelected(item);
-    }
-
-    public double polygonArea(Position... point) {
-
-        log.setText("");
-
-        Position[] ref = new Position[point.length];
-
-        ref[0] = new Position(0, 0);
-        log.append(ref[0].toString());
-        log.append("\n");
-
-        if (point.length == 2) {
-            return Utils.calculateDistance(point[0], point[1]);
-        } else if (point.length < 3) {
-            return 0;
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                startActivityForResult(new Intent(this, SettingsActivity.class), 1);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        for (int i = 1; i < ref.length; i++) {
-            double bearing = Utils.bearing(point[i - 1], point[i]);
-            double distance = Utils.calculateDistance(point[i - 1], point[i]);
-
-            double x = Math.cos(bearing) * distance;
-            double y = Math.sin(bearing) * distance;
-
-            Position p = new Position(x, y);
-            log.append(p.toString());
-            log.append("\n");
-            ref[i] = p;
-        }
-
-        double sum = 0;
-        for (int i = 1; i < ref.length - 1; i++) {
-            double item = ref[i].getLatitude() * (ref[i + 1].getLongitude() - ref[i - 1].getLongitude());
-            sum += item;
-        }
-        sum += ref[0].getLatitude() * (ref[1].getLongitude() - ref[ref.length - 1].getLongitude());
-        sum += ref[ref.length - 1].getLatitude() * (ref[0].getLongitude() - ref[ref.length - 2].getLongitude());
-        return Math.abs(0.5d * sum);
     }
 
 }

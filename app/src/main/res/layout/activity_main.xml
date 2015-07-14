@@ -15,7 +15,6 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@+id/undoButton"
         android:layout_toStartOf="@+id/undoButton"
         android:enabled="false"
         android:text="Capture Point" />
@@ -25,33 +24,33 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Clear"
-        android:layout_above="@+id/result"
-        android:layout_toLeftOf="@+id/countView"
-        android:layout_toStartOf="@+id/countView" />
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/countView"
+        android:layout_alignEnd="@+id/countView" />
 
 
     <TextView
         android:id="@+id/result"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/captureBtn"
         android:text="0.0"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="@dimen/abc_action_bar_default_height_material" />
+        android:textSize="@dimen/abc_action_bar_default_height_material"
+        android:layout_toLeftOf="@+id/countView"
+        android:layout_toStartOf="@+id/countView" />
     <TextView
         android:id="@+id/log"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/estimate" />
+        android:layout_below="@+id/estimate"
+        android:layout_above="@+id/button" />
 
     <TextView
         android:id="@+id/estimate"
@@ -70,20 +69,44 @@
         android:id="@+id/countView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
         android:text="0"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_below="@+id/clearBtn"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="11dp" />
 
     <Button
         android:id="@+id/undoButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/result"
-        android:layout_toLeftOf="@+id/clearBtn"
-        android:layout_toStartOf="@+id/clearBtn"
         android:text="Undo"
-        android:enabled="false" />
+        android:enabled="false"
+        android:layout_marginRight="64dp"
+        android:layout_marginEnd="64dp"
+        android:layout_alignTop="@+id/captureBtn"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:id="@+id/button"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/log"
+        android:layout_alignStart="@+id/log" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="History"
+        android:id="@+id/button2"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
 
 </RelativeLayout>
