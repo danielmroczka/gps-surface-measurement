@@ -1,11 +1,20 @@
 package com.labs.dm.gpssurfacemeasurement;
 
+import android.location.Location;
 import android.widget.TextView;
 
 /**
  * Created by daniel on 2015-07-14.
  */
 public class Utils {
+
+    public static Position toPosition(Location location) {
+        return new Position(location.getLongitude(), location.getLatitude());
+    }
+
+    public static double calculateDistance(Location src, Location dest) {
+        return calculateDistance(new Position(src.getLongitude(), src.getLatitude()), new Position(dest.getLongitude(), dest.getLatitude()));
+    }
 
     public static double calculateDistance(Position src, Position dest) {
 

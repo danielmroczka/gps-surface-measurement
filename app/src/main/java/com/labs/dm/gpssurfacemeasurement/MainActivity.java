@@ -9,6 +9,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +21,7 @@ import java.util.List;
 
 public class MainActivity extends Activity {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     private LocationManager locationManager;
     private Location lastLocation;
     private long mLastLocationMillis;
@@ -31,6 +33,8 @@ public class MainActivity extends Activity {
     private TextView result;
     private TextView log;
     private TextView estimate;
+    private TextView distance;
+    private LocationListener ll;
 
     public void setGpsFix(boolean gpsFix) {
         this.gpsFix = gpsFix;
@@ -51,6 +55,7 @@ public class MainActivity extends Activity {
         counter = (TextView) findViewById(R.id.countView);
         result = (TextView) findViewById(R.id.result);
         estimate = (TextView) findViewById(R.id.estimate);
+        distance = (TextView) findViewById(R.id.distance);
         log = (TextView) findViewById(R.id.log);
 
         button.setOnClickListener(new View.OnClickListener() {
@@ -68,6 +73,7 @@ public class MainActivity extends Activity {
                 undoButton.setEnabled(false);
                 list.clear();
                 estimate.setText("0.0");
+                distance.setText("0.0");
                 result.setText("0.0");
                 log.setText("");
                 counter.setText("0");
@@ -86,7 +92,8 @@ public class MainActivity extends Activity {
         });
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, new LocationListener() {
+
+        ll = new LocationListener() {
 
             @Override
             public void onLocationChanged(Location location) {
@@ -97,14 +104,20 @@ public class MainActivity extends Activity {
                 lastLocation = location;
 
                 if (gpsFix) {
-                    List<Position> tempList = new ArrayList<>(list);
-                    tempList.add(new Position(location.getLongitude(), location.getLatitude()));
-                    double sum = 0;
-                    if (tempList.size() > 1) {
-                        sum = Utils.polygonArea(log, tempList.toArray(new Position[tempList.size()]));
-                    }
 
-                    estimate.setText(String.format("%.3f", (sum)) + (tempList.size() < 3 ? " m" : " m2"));
+                    if (list.size() > 0) {
+                        List<Position> tempList = new ArrayList<>(list);
+                        tempList.add(new Position(location.getLongitude(), location.getLatitude()));
+                        double sum = 0;
+                        sum = Utils.polygonArea(log, tempList.toArray(new Position[tempList.size()]));
+
+                        double lastDistance = Utils.calculateDistance(list.get(list.size() - 1), Utils.toPosition(location));
+                        distance.setText(String.format("%.3f", (lastDistance)));
+                        estimate.setText(String.format("%.3f", (sum)) + (tempList.size() < 3 ? " m" : " m2"));
+                    } else {
+                        distance.setText("0.0");
+                        estimate.setText("0.0");
+                    }
                 }
             }
 
@@ -122,7 +135,7 @@ public class MainActivity extends Activity {
             public void onProviderDisabled(String provider) {
 
             }
-        });
+        };
 
         locationManager.addGpsStatusListener(new GpsStatus.Listener() {
             public void onGpsStatusChanged(int event) {
@@ -163,4 +176,16 @@ public class MainActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(ll);
+        Log.i(TAG, "onPause, done");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, ll);
+    }
 }
