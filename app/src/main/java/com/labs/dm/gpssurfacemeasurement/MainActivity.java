@@ -3,6 +3,7 @@ package com.labs.dm.gpssurfacemeasurement;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
@@ -57,6 +58,7 @@ public class MainActivity extends Activity {
         estimate = (TextView) findViewById(R.id.estimate);
         distance = (TextView) findViewById(R.id.distance);
         log = (TextView) findViewById(R.id.log);
+        log.setTextColor(Color.YELLOW);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,8 +110,7 @@ public class MainActivity extends Activity {
                     if (list.size() > 0) {
                         List<Position> tempList = new ArrayList<>(list);
                         tempList.add(new Position(location.getLongitude(), location.getLatitude()));
-                        double sum = 0;
-                        sum = Utils.polygonArea(log, tempList.toArray(new Position[tempList.size()]));
+                        double sum = Utils.polygonArea(log, tempList.toArray(new Position[tempList.size()]));
 
                         double lastDistance = Utils.calculateDistance(list.get(list.size() - 1), Utils.toPosition(location));
                         distance.setText(String.format("%.3f", (lastDistance)));
@@ -171,14 +172,25 @@ public class MainActivity extends Activity {
             case R.id.action_settings:
                 startActivityForResult(new Intent(this, SettingsActivity.class), 1);
                 return true;
+            case R.id.save:
+                saveTrack();
+                return true;
+            case R.id.history:
+                startActivity(new Intent(this, HistoryActivity.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    private void saveTrack() {
+        DBManager db = new DBManager(this, "maps");
+        db.save(list);
+    }
+
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onDestroy() {
+        super.onDestroy();
         locationManager.removeUpdates(ll);
         Log.i(TAG, "onPause, done");
     }

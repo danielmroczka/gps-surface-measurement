@@ -13,7 +13,8 @@ public class Position {
     private double longitude;
 
     /**
-     * Creates position object using decimal degrees parameters
+     * Creates position object using decimal degrees parameters.
+     * Example: 50N,20E
      *
      * @param latitude  in decimal degrees
      * @param longitude in decimal degrees
