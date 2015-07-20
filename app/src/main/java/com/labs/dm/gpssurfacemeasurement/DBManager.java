@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,7 +31,6 @@ public class DBManager extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
     }
 
     public void save(List<Position> list) {
@@ -53,13 +53,16 @@ public class DBManager extends SQLiteOpenHelper {
     public List<Map<String, String>> list() {
         List<Map<String, String>> list = new ArrayList<>();
         SQLiteDatabase readableDatabase = getReadableDatabase();
-        Cursor cursor = readableDatabase.rawQuery("SELECT id, created from MEASUREMENT", null);
+        Cursor cursor = readableDatabase.rawQuery("SELECT id, created, count(p.id_measurement) from MEASUREMENT m, POINTS p where m.id = p.id_measurement group by id, created", null);
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
             while (!cursor.isLast()) {
                 Map<String, String> map = new HashMap<>();
                 map.put("id", String.valueOf(cursor.getLong(0)));
-                map.put("created", new Date(cursor.getLong(1)).toString());
+
+                String formattedDate = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date(cursor.getLong(1)));
+
+                map.put("created", formattedDate + " (" + cursor.getLong(2) + ")");
                 list.add(map);
                 cursor.moveToNext();
             }

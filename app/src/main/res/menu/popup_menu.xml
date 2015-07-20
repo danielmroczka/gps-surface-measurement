@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/item_movies"
+        android:title="Share"
+        android:visible="true"/>
+    <item
+        android:id="@+id/item_music"
+        android:title="Show on map"
+        android:visible="true"/>
+    <item
+        android:id="@+id/item_comedy"
+        android:title="Delete"
+        android:visible="true"/>
+
+</menu>
