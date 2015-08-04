@@ -1,4 +1,4 @@
-package com.labs.dm.gpssurfacemeasurement;
+package com.labs.dm.measure.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -16,6 +16,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.labs.dm.measure.R;
+import com.labs.dm.measure.db.DBManager;
+import com.labs.dm.measure.domain.Position;
+import com.labs.dm.measure.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,13 +41,12 @@ public class MainActivity extends Activity {
     private TextView estimate;
     private TextView distance;
     private LocationListener ll;
+    private boolean gpsFix;
 
     public void setGpsFix(boolean gpsFix) {
         this.gpsFix = gpsFix;
         button.setEnabled(gpsFix);
     }
-
-    private boolean gpsFix;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +68,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Location locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                list.add(new Position(locationGPS.getLongitude(), locationGPS.getLatitude()));
+                list.add(new Position(locationGPS.getLatitude(), locationGPS.getLongitude()));
                 undoButton.setEnabled(true);
                 calculate();
             }
@@ -109,7 +113,7 @@ public class MainActivity extends Activity {
 
                     if (list.size() > 0) {
                         List<Position> tempList = new ArrayList<>(list);
-                        tempList.add(new Position(location.getLongitude(), location.getLatitude()));
+                        tempList.add(new Position(location.getLatitude(), location.getLongitude()));
                         double sum = Utils.polygonArea(log, tempList.toArray(new Position[tempList.size()]));
 
                         double lastDistance = Utils.calculateDistance(list.get(list.size() - 1), Utils.toPosition(location));

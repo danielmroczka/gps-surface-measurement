@@ -1,4 +1,4 @@
-package com.labs.dm.gpssurfacemeasurement;
+package com.labs.dm.measure.activity;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -6,7 +6,9 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 
-public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener  {
+import com.labs.dm.measure.R;
+
+public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private Preference pref;
     private String summaryStr;

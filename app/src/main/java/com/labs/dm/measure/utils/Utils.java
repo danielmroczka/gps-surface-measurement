@@ -1,7 +1,9 @@
-package com.labs.dm.gpssurfacemeasurement;
+package com.labs.dm.measure.utils;
 
 import android.location.Location;
 import android.widget.TextView;
+
+import com.labs.dm.measure.domain.Position;
 
 /**
  * Created by daniel on 2015-07-14.

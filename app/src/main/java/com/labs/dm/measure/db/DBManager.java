@@ -1,10 +1,13 @@
-package com.labs.dm.gpssurfacemeasurement;
+package com.labs.dm.measure.db;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.labs.dm.measure.domain.Measurement;
+import com.labs.dm.measure.domain.Position;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,7 +42,7 @@ public class DBManager extends SQLiteOpenHelper {
         content.put("created", new Date().getTime());
         long id = writableDatabase.insertOrThrow("MEASUREMENT", null, content);
 
-        for (Position pos:list) {
+        for (Position pos : list) {
             content = new ContentValues();
             content.put("latitude", pos.getLatitude());
             content.put("longitude", pos.getLongitude());
@@ -70,6 +73,46 @@ public class DBManager extends SQLiteOpenHelper {
 
         cursor.close();
 
+        return list;
+    }
+
+    public void delete(int id) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete("POINTS", "id_measurement", new String[]{String.valueOf(id)});
+        db.delete("MEASUREMENT", "id", new String[]{String.valueOf(id)});
+        db.close();
+    }
+
+    public Measurement getMeasurement(String id) {
+        SQLiteDatabase readableDatabase = getReadableDatabase();
+        Cursor cursor = readableDatabase.rawQuery("SELECT created from MEASUREMENT m where m.id=" + id, null);
+        Measurement measurement = null;
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            measurement = new Measurement(new Date(cursor.getLong(0)));
+        }
+
+        cursor.close();
+        readableDatabase.close();
+        return measurement;
+
+    }
+
+    public List<Position> getPoints(String id) {
+        List<Position> list = new ArrayList<>();
+
+        SQLiteDatabase readableDatabase = getReadableDatabase();
+        Cursor cursor = readableDatabase.rawQuery("SELECT latitude, longitude from POINTS p where p.id_measurement=" + id, null);
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            while (!cursor.isLast()) {
+                list.add(new Position(cursor.getDouble(0), cursor.getDouble(1)));
+                cursor.moveToNext();
+            }
+        }
+
+        cursor.close();
+        readableDatabase.close();
         return list;
     }
 }

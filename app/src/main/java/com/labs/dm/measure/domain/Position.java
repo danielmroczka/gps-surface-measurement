@@ -1,7 +1,7 @@
 /*
  * Copyright daniel.mroczka@gmail.com. All rights reserved. 
  */
-package com.labs.dm.gpssurfacemeasurement;
+package com.labs.dm.measure.domain;
 
 
 /**
@@ -34,6 +34,6 @@ public class Position {
 
     @Override
     public String toString() {
-        return String.format("%.2f,%.2f", getLatitude(), getLongitude());
+        return String.format("%.6f,%.6f", getLatitude(), getLongitude());
     }
 }

@@ -3,15 +3,15 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="com.labs.dm.gpssurfacemeasurement.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="com.labs.dm.measure.activity.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
 
     <header
-        android:fragment="com.labs.dm.gpssurfacemeasurement.SettingsActivity$NotificationPreferenceFragment"
+        android:fragment="com.labs.dm.measure.activity.SettingsActivity$NotificationPreferenceFragment"
         android:title="@string/pref_header_notifications" />
 
     <header
-        android:fragment="com.labs.dm.gpssurfacemeasurement.SettingsActivity$DataSyncPreferenceFragment"
+        android:fragment="com.labs.dm.measure.activity.SettingsActivity$DataSyncPreferenceFragment"
         android:title="@string/pref_header_data_sync" />
 
 </preference-headers>

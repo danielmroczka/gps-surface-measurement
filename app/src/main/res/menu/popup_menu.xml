@@ -1,16 +1,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/item_movies"
+        android:id="@+id/share"
         android:title="Share"
-        android:visible="true"/>
+        android:visible="true" />
     <item
-        android:id="@+id/item_music"
+        android:id="@+id/showmap"
         android:title="Show on map"
-        android:visible="true"/>
+        android:visible="true" />
     <item
-        android:id="@+id/item_comedy"
+        android:id="@+id/delete"
         android:title="Delete"
-        android:visible="true"/>
+        android:visible="true" />
 
 </menu>

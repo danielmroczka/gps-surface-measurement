@@ -1,4 +1,4 @@
-package com.labs.dm.gpssurfacemeasurement;
+package com.labs.dm.measure;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
