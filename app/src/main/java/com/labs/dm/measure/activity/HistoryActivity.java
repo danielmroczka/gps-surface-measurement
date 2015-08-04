@@ -92,7 +92,7 @@ public class HistoryActivity extends Activity {
     }
 
     private void delete(String id) {
-        db.delete(Integer.valueOf(id));
+        db.delete(id);
     }
 
     private void showMap() {

@@ -76,11 +76,14 @@ public class DBManager extends SQLiteOpenHelper {
         return list;
     }
 
-    public void delete(int id) {
+    public void delete(String id) {
         SQLiteDatabase db = getWritableDatabase();
-        db.delete("POINTS", "id_measurement", new String[]{String.valueOf(id)});
-        db.delete("MEASUREMENT", "id", new String[]{String.valueOf(id)});
-        db.close();
+        try {
+            db.delete("POINTS", "id_measurement=?", new String[]{id});
+            db.delete("MEASUREMENT", "id=?", new String[]{id});
+        } finally {
+            db.close();
+        }
     }
 
     public Measurement getMeasurement(String id) {
