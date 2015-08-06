@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.labs.dm.measure.R;
 import com.labs.dm.measure.db.DBManager;
@@ -190,6 +191,7 @@ public class MainActivity extends Activity {
     private void saveTrack() {
         DBManager db = new DBManager(this, "maps");
         db.save(list);
+        Toast.makeText(this, "Saved track with " + list.size() + " items", Toast.LENGTH_SHORT).show();
     }
 
     @Override

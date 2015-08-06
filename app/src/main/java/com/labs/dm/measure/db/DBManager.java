@@ -76,11 +76,12 @@ public class DBManager extends SQLiteOpenHelper {
         return list;
     }
 
-    public void delete(String id) {
+    public boolean delete(String id) {
         SQLiteDatabase db = getWritableDatabase();
         try {
             db.delete("POINTS", "id_measurement=?", new String[]{id});
             db.delete("MEASUREMENT", "id=?", new String[]{id});
+            return true;
         } finally {
             db.close();
         }

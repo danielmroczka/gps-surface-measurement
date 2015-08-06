@@ -19,6 +19,7 @@ import com.labs.dm.measure.R;
 import com.labs.dm.measure.db.DBManager;
 import com.labs.dm.measure.domain.Measurement;
 import com.labs.dm.measure.domain.Position;
+import com.labs.dm.measure.utils.Utils;
 
 import org.xmlpull.v1.XmlSerializer;
 
@@ -92,7 +93,9 @@ public class HistoryActivity extends Activity {
     }
 
     private void delete(String id) {
-        db.delete(id);
+        if (db.delete(id)) {
+            Toast.makeText(this, "Deleted track", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showMap() {
@@ -104,18 +107,20 @@ public class HistoryActivity extends Activity {
     private void share(String id) throws IOException {
         Measurement measurement = db.getMeasurement(id);
         List<Position> list = db.getPoints(id);
+
         File sd = Environment.getExternalStorageDirectory();
         filename = "track_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(measurement.getCreated()) + ".xml";
         File f = new File(sd, filename);
         FileWriter write = new FileWriter(f);
-        XmlSerializer xml = Xml.newSerializer();
 
+        XmlSerializer xml = Xml.newSerializer();
         xml.setOutput(write);
         xml.startDocument("UTF-8", true);
-
         xml.startTag("", "measurement");
         xml.attribute("", "created", String.valueOf(measurement.getCreated()));
+        xml.attribute("", "area", String.valueOf(Utils.polygonArea(null, list.toArray(new Position[list.size()]))));
         xml.endTag("", "measurement");
+
         xml.startTag("", "positions");
         for (Position position : list) {
             xml.startTag("", "pos");

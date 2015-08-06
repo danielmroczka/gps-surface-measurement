@@ -45,13 +45,15 @@ public class Utils {
 
     public static double polygonArea(TextView log, Position... point) {
 
-        log.setText("");
 
         Position[] ref = new Position[point.length];
 
         ref[0] = new Position(0, 0);
-        log.append(ref[0].toString());
-        log.append("\n");
+        if (log!=null) {
+            log.setText("");
+            log.append(ref[0].toString());
+            log.append("\n");
+        }
 
         if (point.length == 2) {
             return calculateDistance(point[0], point[1]);
@@ -67,8 +69,10 @@ public class Utils {
             double y = Math.sin(bearing) * distance;
 
             Position p = new Position(x, y);
-            log.append(p.toString());
-            log.append("\n");
+            if (log != null) {
+                log.append(p.toString());
+                log.append("\n");
+            }
             ref[i] = p;
         }
 
