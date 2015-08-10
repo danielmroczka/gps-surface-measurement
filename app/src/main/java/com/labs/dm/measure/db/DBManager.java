@@ -36,6 +36,12 @@ public class DBManager extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
+    /**
+     * Creates one item in MEASUREMENT table
+     * Creates many items in POINTS table
+     *
+     * @param list
+     */
     public void save(List<Position> list) {
         SQLiteDatabase writableDatabase = getWritableDatabase();
         ContentValues content = new ContentValues();
@@ -57,22 +63,16 @@ public class DBManager extends SQLiteOpenHelper {
         List<Map<String, String>> list = new ArrayList<>();
         SQLiteDatabase readableDatabase = getReadableDatabase();
         Cursor cursor = readableDatabase.rawQuery("SELECT id, created, count(p.id_measurement) from MEASUREMENT m, POINTS p where m.id = p.id_measurement group by id, created", null);
-        if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            while (!cursor.isLast()) {
-                Map<String, String> map = new HashMap<>();
-                map.put("id", String.valueOf(cursor.getLong(0)));
-
-                String formattedDate = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date(cursor.getLong(1)));
-
-                map.put("created", formattedDate + " (" + cursor.getLong(2) + ")");
-                list.add(map);
-                cursor.moveToNext();
-            }
+        while (cursor.moveToNext()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("id", String.valueOf(cursor.getLong(0)));
+            String formattedDate = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date(cursor.getLong(1)));
+            map.put("created", formattedDate + " (" + cursor.getLong(2) + ")");
+            list.add(map);
         }
 
         cursor.close();
-
+        readableDatabase.close();
         return list;
     }
 
@@ -91,8 +91,7 @@ public class DBManager extends SQLiteOpenHelper {
         SQLiteDatabase readableDatabase = getReadableDatabase();
         Cursor cursor = readableDatabase.rawQuery("SELECT created from MEASUREMENT m where m.id=" + id, null);
         Measurement measurement = null;
-        if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
+        if (cursor.moveToFirst()) {
             measurement = new Measurement(new Date(cursor.getLong(0)));
         }
 
@@ -107,12 +106,9 @@ public class DBManager extends SQLiteOpenHelper {
 
         SQLiteDatabase readableDatabase = getReadableDatabase();
         Cursor cursor = readableDatabase.rawQuery("SELECT latitude, longitude from POINTS p where p.id_measurement=" + id, null);
-        if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            while (!cursor.isLast()) {
-                list.add(new Position(cursor.getDouble(0), cursor.getDouble(1)));
-                cursor.moveToNext();
-            }
+        while (cursor.moveToNext()) {
+            list.add(new Position(cursor.getDouble(0), cursor.getDouble(1)));
+            cursor.moveToNext();
         }
 
         cursor.close();
