@@ -118,8 +118,8 @@ public class MainActivity extends Activity {
                         double sum = Utils.polygonArea(log, tempList.toArray(new Position[tempList.size()]));
 
                         double lastDistance = Utils.calculateDistance(list.get(list.size() - 1), Utils.toPosition(location));
-                        distance.setText(String.format("%.3f", (lastDistance)));
-                        estimate.setText(String.format("%.3f", (sum)) + (tempList.size() < 3 ? " m" : " m2"));
+                        distance.setText(String.format("%.3f", (lastDistance)) + " m");
+                        estimate.setText(String.format("%.3f", (sum)) + Utils.getUnits(list));
                     } else {
                         distance.setText("0.0");
                         estimate.setText("0.0");
@@ -161,7 +161,7 @@ public class MainActivity extends Activity {
             sum = Utils.polygonArea(log, list.toArray(new Position[list.size()]));
         }
 
-        result.setText(String.format("%.3f", (sum)) + (list.size() < 3 ? " m" : " m2"));
+        result.setText(String.format("%.3f", (sum)) + Utils.getUnits(list));
         counter.setText(String.valueOf(list.size()));
     }
 

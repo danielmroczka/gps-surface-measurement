@@ -5,17 +5,19 @@ import android.widget.TextView;
 
 import com.labs.dm.measure.domain.Position;
 
+import java.util.Collection;
+
 /**
  * Created by daniel on 2015-07-14.
  */
 public class Utils {
 
     public static Position toPosition(Location location) {
-        return new Position(location.getLongitude(), location.getLatitude());
+        return new Position(location.getLatitude(), location.getLongitude());
     }
 
     public static double calculateDistance(Location src, Location dest) {
-        return calculateDistance(new Position(src.getLongitude(), src.getLatitude()), new Position(dest.getLongitude(), dest.getLatitude()));
+        return calculateDistance(new Position(src.getLatitude(), src.getLongitude()), new Position(dest.getLatitude(), dest.getLongitude()));
     }
 
     public static double calculateDistance(Position src, Position dest) {
@@ -44,14 +46,12 @@ public class Utils {
     }
 
     public static double polygonArea(TextView log, Position... point) {
-
-
         Position[] ref = new Position[point.length];
 
         ref[0] = new Position(0, 0);
-        if (log!=null) {
+        if (log != null) {
             log.setText("");
-            log.append(ref[0].toString());
+            log.append(String.format("%.2f,\t%.2f", ref[0].getLatitude(), ref[0].getLongitude()));
             log.append("\n");
         }
 
@@ -70,7 +70,7 @@ public class Utils {
 
             Position p = new Position(x, y);
             if (log != null) {
-                log.append(p.toString());
+                log.append(String.format("%.2f,\t%.2f", x, y));
                 log.append("\n");
             }
             ref[i] = p;
@@ -84,5 +84,9 @@ public class Utils {
         sum += ref[0].getLatitude() * (ref[1].getLongitude() - ref[ref.length - 1].getLongitude());
         sum += ref[ref.length - 1].getLatitude() * (ref[0].getLongitude() - ref[ref.length - 2].getLongitude());
         return Math.abs(0.5d * sum);
+    }
+
+    public static String getUnits(Collection c) {
+        return (c.size() < 3 ? " m" : " m2");
     }
 }

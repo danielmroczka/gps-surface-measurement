@@ -21,8 +21,10 @@ import java.util.Map;
  */
 public class DBManager extends SQLiteOpenHelper {
 
+    private final static int VERSION = 1;
+
     public DBManager(Context context, String name) {
-        super(context, name, null, 1);
+        super(context, name, null, VERSION);
     }
 
     @Override
