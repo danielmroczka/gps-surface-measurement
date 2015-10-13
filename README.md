@@ -1,5 +1,7 @@
 # gps-surface-measurement
 
+[![Travis Build Status](https://travis-ci.org/danielmroczka/gps-surface-measurement.png?branch=master)](https://travis-ci.org/danielmroczka/gps-surface-measurement)
+
 Distance and area measurement Android application based on GPS coordinates.
 
 Functionalities:
